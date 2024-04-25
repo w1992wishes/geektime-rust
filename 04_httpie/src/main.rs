@@ -69,7 +69,7 @@ impl FromStr for KvPair {
 
     fn from_str(s: &str) -> Result<Self, Self::Err> {
         // 使用 = 进行 split，这会得到一个迭代器
-        let mut split = s.split('=');
+        let mut split: std::str::Split<'_, char> = s.split('=');
         let err = || anyhow!(format!("Failed to parse {}", s));
         Ok(Self {
             // 从迭代器中取第一个结果作为 key，迭代器返回 Some(T)/None
@@ -101,7 +101,7 @@ async fn get(client: Client, args: &Get) -> Result<()> {
 
 /// 处理 post 子命令
 async fn post(client: Client, args: &Post) -> Result<()> {
-    let mut body = HashMap::new();
+    let mut body: HashMap<&String, &String> = HashMap::new();
     for pair in args.body.iter() {
         body.insert(&pair.k, &pair.v);
     }
@@ -111,14 +111,14 @@ async fn post(client: Client, args: &Post) -> Result<()> {
 
 // 打印服务器版本号 + 状态码
 fn print_status(resp: &Response) {
-    let status = format!("{:?} {}", resp.version(), resp.status()).blue();
+    let status: colored::ColoredString = format!("{:?} {}", resp.version(), resp.status()).yellow();
     println!("{}\n", status);
 }
 
 // 打印服务器返回的 HTTP header
 fn print_headers(resp: &Response) {
     for (name, value) in resp.headers() {
-        println!("{}: {:?}", name.to_string().green(), value);
+        println!("{}: {:?}", name.to_string().red(), value);
     }
 
     println!();
@@ -154,14 +154,15 @@ fn get_content_type(resp: &Response) -> Option<Mime> {
 }
 
 /// 程序的入口函数，因为在 http 请求时我们使用了异步处理，所以这里引入 tokio
+/// cargo run get -- https://www.google.com/
 #[tokio::main]
 async fn main() -> Result<()> {
     let opts: Opts = Opts::parse();
-    let mut headers = header::HeaderMap::new();
+    let mut headers: header::HeaderMap = header::HeaderMap::new();
     // 为我们的 http 客户端添加一些缺省的 HTTP 头
     headers.insert("X-POWERED-BY", "Rust".parse()?);
     headers.insert(header::USER_AGENT, "Rust Httpie".parse()?);
-    let client = reqwest::Client::builder()
+    let client: Client = reqwest::Client::builder()
         .default_headers(headers)
         .build()?;
     let result = match opts.subcmd {
