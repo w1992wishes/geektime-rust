@@ -66,9 +66,9 @@ pub async fn query<T: AsRef<str>>(sql: T) -> Result<DataSet> {
     info!("retrieving data from source: {}", source);
 
     // 从 source 读入一个 DataSet
-    let ds = detect_content(retrieve_data(source).await?).load()?;
+    let ds: DataSet = detect_content(retrieve_data(source).await?).load()?;
 
-    let mut filtered = match condition {
+    let mut filtered: LazyFrame = match condition {
         Some(expr) => ds.0.lazy().filter(expr),
         None => ds.0.lazy(),
     };

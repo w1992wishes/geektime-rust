@@ -1,0 +1,19 @@
+[package]
+name = "wan"
+version = "0.1.0"
+edition = "2021"
+
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+# log框架
+tracing = "0.1"
+tracing-subscriber = "0.2"  
+
+# router
+axum = "0.2" # web 服务器
+tokio = { version = "1", features = ["full"] } # 异步处理
+
+# polars  是一个用于数据操作和分析的 Rust 库，特别是针对大型数据集的高性能处理
+polars = { version = "0.15", features = ["json", "lazy"] } # DataFrame 库

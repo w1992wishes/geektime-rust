@@ -34,7 +34,7 @@ impl Load for CsvLoader {
     type Error = anyhow::Error;
 
     fn load(self) -> Result<DataSet, Self::Error> {
-        let df = CsvReader::new(Cursor::new(self.0))
+        let df: DataFrame = CsvReader::new(Cursor::new(self.0))
             .infer_schema(Some(16))
             .finish()?;
         Ok(DataSet(df))

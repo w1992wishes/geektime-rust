@@ -3,8 +3,8 @@ static MAX: u32 = 0;
 fn foo() {}
 
 fn main() {
-    let hello = "hello world".to_string();
-    let data = Box::new(1);
+    let hello: String = "hello world".to_string();
+    let data: Box<i32> = Box::new(1);
 
     // string literals 指向 RODATA 地址
     println!("RODATA: {:p}", "hello world!");

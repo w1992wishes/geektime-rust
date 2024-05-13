@@ -81,7 +81,7 @@ async fn generate(
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
     let url: &str = &percent_decode_str(&url).decode_utf8_lossy();
-    let data = retrieve_image(url, cache)
+    let data: Bytes = retrieve_image(url, cache)
         .await
         .map_err(|_| StatusCode::BAD_REQUEST)?;
 
@@ -102,20 +102,20 @@ async fn generate(
 
 #[instrument(level = "info", skip(cache))]
 async fn retrieve_image(url: &str, cache: Cache) -> Result<Bytes> {
-    let mut hasher = DefaultHasher::new();
+    let mut hasher: DefaultHasher = DefaultHasher::new();
     url.hash(&mut hasher);
-    let key = hasher.finish();
+    let key: u64 = hasher.finish();
 
-    let g = &mut cache.lock().await;
-    let data = match g.get(&key) {
+    let g: &mut tokio::sync::MutexGuard<'_, LruCache<u64, Bytes>> = &mut cache.lock().await;
+    let data: Bytes = match g.get(&key) {
         Some(v) => {
             info!("Match cache {}", key);
             v.to_owned()
         }
         None => {
             info!("Retrieve url");
-            let resp = reqwest::get(url).await?;
-            let data = resp.bytes().await?;
+            let resp: reqwest::Response = reqwest::get(url).await?;
+            let data: Bytes = resp.bytes().await?;
             g.put(key, data.clone());
             data
         }
@@ -127,11 +127,11 @@ async fn retrieve_image(url: &str, cache: Cache) -> Result<Bytes> {
 // 调试辅助函数
 fn print_test_url(url: &str) {
     use std::borrow::Borrow;
-    let spec1 = Spec::new_resize(500, 800, resize::SampleFilter::CatmullRom);
-    let spec2 = Spec::new_watermark(20, 20);
-    let spec3 = Spec::new_filter(filter::Filter::Marine);
-    let image_spec = ImageSpec::new(vec![spec1, spec2, spec3]);
+    let spec1: Spec = Spec::new_resize(500, 800, resize::SampleFilter::CatmullRom);
+    let spec2: Spec = Spec::new_watermark(20, 20);
+    let spec3: Spec = Spec::new_filter(filter::Filter::Marine);
+    let image_spec: ImageSpec = ImageSpec::new(vec![spec1, spec2, spec3]);
     let s: String = image_spec.borrow().into();
-    let test_image = percent_encode(url.as_bytes(), NON_ALPHANUMERIC).to_string();
+    let test_image: String = percent_encode(url.as_bytes(), NON_ALPHANUMERIC).to_string();
     println!("test url: http://localhost:3000/image/{}/{}", s, test_image);
 }

@@ -11,7 +11,7 @@ pub trait Fetch {
 
 /// 从文件源或者 http 源中获取数据，返回字符串
 pub async fn retrieve_data(source: impl AsRef<str>) -> Result<String> {
-    let name = source.as_ref();
+    let name: &str = source.as_ref();
     match &name[..4] {
         // 包括 http / https
         "http" => UrlFetcher(name).fetch().await,
